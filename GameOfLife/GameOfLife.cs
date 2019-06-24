@@ -11,19 +11,25 @@ using System.Drawing.Drawing2D;
 
 namespace GameOfLife
 {
-    public partial class Form1 : Form
+    public partial class GameOfLife : Form
     {
+        //Note: A progress bar has been added to give the user some feedback when clicking the screen.
+        //      Running the debug build causes the program to hang when calculating the new phase, so this progress bar's development can be seen.
+        //      Running the release build calculates the next phase almost instantaneously, rendering the bar useless.
+
         const int SECTION_SIZE = 12; // 1 box is 12x12 pixels minimum, line border 1 pixel which leaves 10x10 to be filled in. This can be scaled to multiples of 12 for bigger or smaller games.
+        const int GRID_OFFSET = 5*SECTION_SIZE; // create blank space around the board for the life to move into
         
         Bitmap bitmap;
         bool[,] lifeGrid;
         int gridSizeX, gridSizeY;
 
-        public Form1()
+        public GameOfLife()
         {
             if (SECTION_SIZE<12 || SECTION_SIZE > 360 || SECTION_SIZE%12 != 0 )
             {
                 MessageBox.Show("Section Size was set to an invalid size.");
+                Application.Exit();
             }
 
             InitializeComponent();
@@ -32,6 +38,8 @@ namespace GameOfLife
             gridSizeY = pictureBox1.Height / SECTION_SIZE;
             lifeGrid = new bool[gridSizeX, gridSizeY];
             bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
+
+            toolStripProgressBar1.Maximum = 720 / SECTION_SIZE + gridSizeX; // 1 step for each main drawing loop, 1 step for each calculateNextPhase loop
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -40,8 +48,9 @@ namespace GameOfLife
         }
 
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void GameOfLife_Load(object sender, EventArgs e)
         {
+
             Graphics g = Graphics.FromImage(bitmap);
             g.Clear(Color.Black);
 
@@ -54,9 +63,9 @@ namespace GameOfLife
 
             }
             Random r = new Random();
-            for (int i = 0; i < 720; i += SECTION_SIZE)
+            for (int i = 0 + GRID_OFFSET; i < 720 - GRID_OFFSET; i += SECTION_SIZE)
             {
-                for (int j = 0; j < 720; j += SECTION_SIZE)
+                for (int j = 0 + GRID_OFFSET; j < 720 - GRID_OFFSET; j += SECTION_SIZE)
                 {
                     if (r.Next() % 2 == 0)
                     {
@@ -75,9 +84,13 @@ namespace GameOfLife
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
+            toolStripProgressBar1.Value = 0;
+            toolStripProgressBar1.Visible = true;
+            toolStripStatusLabel1.Visible = false;
             calculateNextPhase();
             Graphics g = Graphics.FromImage(bitmap);
             g.Clear(Color.Black);
+
 
             for (int i = 0; i < 720; i += SECTION_SIZE)
             {
@@ -86,10 +99,6 @@ namespace GameOfLife
                 g.DrawLine(Pens.DimGray, 0, i, 720, i);
                 g.DrawLine(Pens.DimGray, 0, i + SECTION_SIZE - 1, 720, i + SECTION_SIZE - 1);
 
-            }
-
-            for (int i = 0; i < 720; i += SECTION_SIZE)
-            {
                 for (int j = 0; j < 720; j += SECTION_SIZE)
                 {
                     if (lifeGrid[i/ SECTION_SIZE, j/ SECTION_SIZE])
@@ -99,8 +108,11 @@ namespace GameOfLife
                         g.FillRectangle(Brushes.ForestGreen, i + 1, j + 1, SECTION_SIZE - 3, SECTION_SIZE - 3);
                     }
                 }
+                toolStripProgressBar1.PerformStep();
             }
             pictureBox1.Invalidate();
+            //toolStripProgressBar1.Visible = false;
+            toolStripStatusLabel1.Visible = true;
         }
 
         private void calculateNextPhase()
@@ -150,6 +162,7 @@ namespace GameOfLife
                         case 3: newGrid[i, j] = true; break;
                     }
                 }
+                toolStripProgressBar1.PerformStep();
             }
             lifeGrid = newGrid;
         }
