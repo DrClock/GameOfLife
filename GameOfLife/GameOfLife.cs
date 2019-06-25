@@ -19,7 +19,7 @@ namespace GameOfLife
         //      Running the release build calculates the next phase almost instantaneously, rendering the bar useless.
 
         const int SECTION_SIZE = 12; // 1 box is 12x12 pixels minimum, line border 1 pixel which leaves 10x10 to be filled in. This can be scaled to multiples of 12 for bigger or smaller games.
-        const int GRID_OFFSET = 5*SECTION_SIZE; // create blank space around the board for the life to move into
+        const int GRID_OFFSET = 10*SECTION_SIZE; // create blank space around the board for the life to move into
         
         Bitmap bitmap;
         bool[,] lifeGrid;
@@ -35,12 +35,13 @@ namespace GameOfLife
 
             InitializeComponent();
             
-            gridSizeX = pictureBox1.Width / SECTION_SIZE;
+            gridSizeX = pictureBox1.Width / SECTION_SIZE; // I have chosen to fix the pixel size of the pictureBox to 720x720. It may be possible to
             gridSizeY = pictureBox1.Height / SECTION_SIZE;
             lifeGrid = new bool[gridSizeX, gridSizeY];
             bitmap = new Bitmap(pictureBox1.Width, pictureBox1.Height);
 
-            toolStripProgressBar1.Maximum = 720 / SECTION_SIZE + gridSizeX; // 1 step for each main drawing loop, 1 step for each calculateNextPhase loop
+            // 1 step for each calculateNextPhase loop, 1 step for each main drawing loop (the form does not update the progress bar until the pictureBox is drawn, however)
+            toolStripProgressBar1.Maximum = 720 / SECTION_SIZE + gridSizeX; 
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -57,6 +58,7 @@ namespace GameOfLife
 
             for (int i = 0; i < 720; i += SECTION_SIZE)
             {
+                // draw the lines
                 g.DrawLine(Pens.DimGray, i, 0, i, 720);
                 g.DrawLine(Pens.DimGray, i + SECTION_SIZE - 1, 0, i + SECTION_SIZE - 1, 720);
                 g.DrawLine(Pens.DimGray, 0, i, 720, i);
@@ -64,6 +66,7 @@ namespace GameOfLife
 
             }
             Random r = new Random();
+            // randomly populate a section of the grid
             for (int i = 0 + GRID_OFFSET; i < 720 - GRID_OFFSET; i += SECTION_SIZE)
             {
                 for (int j = 0 + GRID_OFFSET; j < 720 - GRID_OFFSET; j += SECTION_SIZE)
@@ -112,13 +115,13 @@ namespace GameOfLife
                 toolStripProgressBar1.PerformStep();
             }
             pictureBox1.Invalidate();
-            //toolStripProgressBar1.Visible = false;
+            //toolStripProgressBar1.Visible = false; // I'm keeping this visible for now, to prove the progress bar is full on completion
             toolStripStatusLabel1.Visible = true;
         }
 
+        // holding down a key will rapidly advance through stages
         private void GameOfLife_KeyPress(object sender, KeyEventArgs e)
         {
-            
             pictureBox1_Click(sender, e);
         }
 
@@ -134,11 +137,11 @@ namespace GameOfLife
                     boxNeighbours = 0;
                     for (int di = -1; di<=1; di++)
                     {
-                        for (int dj = -1; dj <= 1; dj++)
+                        for (int dj = -1; dj <= 1; dj++) // go through each of its neighbours (and itself)
                         {
                             try
                             {
-                                if (di == 0 && dj == 0)
+                                if (di == 0 && dj == 0) // don't count itself as a neighbour!
                                 {
                                     currentBoxState = lifeGrid[i, j];
                                 }
@@ -147,7 +150,7 @@ namespace GameOfLife
                                     boxNeighbours++;
                                 }
                             }
-                            catch (IndexOutOfRangeException) { }
+                            catch (IndexOutOfRangeException) { } // this is thrown on edge cases, when a cell does not have 8 neighbours.
                         }
                     }
 
