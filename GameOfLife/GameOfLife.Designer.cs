@@ -73,10 +73,10 @@
             // 
             this.toolStripStatusLabel1.ForeColor = System.Drawing.SystemColors.ControlText;
             this.toolStripStatusLabel1.Name = "toolStripStatusLabel1";
-            this.toolStripStatusLabel1.Size = new System.Drawing.Size(98, 17);
-            this.toolStripStatusLabel1.Text = "Click to progress!";
+            this.toolStripStatusLabel1.Size = new System.Drawing.Size(190, 17);
+            this.toolStripStatusLabel1.Text = "Click or press a button to progress!";
             // 
-            // Form1
+            // GameOfLife
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -88,10 +88,11 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
-            this.Name = "Form1";
+            this.Name = "GameOfLife";
             this.ShowIcon = false;
             this.Text = "Game of Life";
             this.Load += new System.EventHandler(this.GameOfLife_Load);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.GameOfLife_KeyPress);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.statusStrip1.ResumeLayout(false);
             this.statusStrip1.PerformLayout();

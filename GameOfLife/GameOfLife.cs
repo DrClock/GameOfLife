@@ -14,7 +14,8 @@ namespace GameOfLife
     public partial class GameOfLife : Form
     {
         //Note: A progress bar has been added to give the user some feedback when clicking the screen.
-        //      Running the debug build causes the program to hang when calculating the new phase, so this progress bar's development can be seen.
+        //      Running the debug build causes the program to hang when calculating the new phase, so this progress bar's development can be seen. (While hanging, any keyboard inputs
+        //      are still recognised and will be executed immediately after. This can lead to the program being unresponsive for some time.) 
         //      Running the release build calculates the next phase almost instantaneously, rendering the bar useless.
 
         const int SECTION_SIZE = 12; // 1 box is 12x12 pixels minimum, line border 1 pixel which leaves 10x10 to be filled in. This can be scaled to multiples of 12 for bigger or smaller games.
@@ -113,6 +114,12 @@ namespace GameOfLife
             pictureBox1.Invalidate();
             //toolStripProgressBar1.Visible = false;
             toolStripStatusLabel1.Visible = true;
+        }
+
+        private void GameOfLife_KeyPress(object sender, KeyEventArgs e)
+        {
+            
+            pictureBox1_Click(sender, e);
         }
 
         private void calculateNextPhase()
